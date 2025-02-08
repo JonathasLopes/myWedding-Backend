@@ -3,9 +3,9 @@ export default function VerifyBasicAuth(authorization: string[]) {
         return ({ status: 401, message: "Missing Basic Authorization!" });
     }
 
-    const credentials = Buffer.from(authorization[1], 'base64').toString();
+    //const credentials = Buffer.from(authorization[1], 'base64').toString();
 
-    if (credentials !== process.env.TOKEN_BASIC) {
+    if (authorization[1] !== process.env.TOKEN) {
         return ({ status: 401, message: "Invalid Authentication Credentials!" });
     }
 

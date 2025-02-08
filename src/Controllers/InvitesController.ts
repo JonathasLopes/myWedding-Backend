@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import VerifyBasicAuthHelper from '../Helpers/VerifyBasicAuthHelper';
 import { ValidateString } from '../Helpers/ValidateTypes';
-import { GetAllByFamilyId, GetByName, UpdateConfirmed } from '../Repositories/InvitesRepository';
+import { CreateInviteMassive, GetAllByFamilyId, GetByName, UpdateConfirmed } from '../Repositories/InvitesRepository';
 import ReadExcel from '../Helpers/ReadExcel';
 import fs from 'fs';
 import IResponseFamily from '../Interfaces/ResponseFamilyInterface';
@@ -39,37 +39,41 @@ class InvitesController {
 
     async SearchInvite(request: Request, response: Response): Promise<any> {
         const { firstName, lastName } = request.body;
-
+    
         try {
-            var headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
-
-            if (headerResponse === 400) {
-                return response.status(400).json({ message: "Usuário não autenticado!" })
-            } else if (headerResponse === 401) {
-                return response.status(401).json({ message: "Usuário não autorizado!" });
+            const headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
+    
+            switch (headerResponse) {
+                case 400:
+                    return response.status(400).json({ message: "Usuário não autenticado!" });
+                case 401:
+                    return response.status(401).json({ message: "Usuário não autorizado!" });
             }
-
-            if (!ValidateString(firstName) && !ValidateString(lastName)) {
+    
+            if (!ValidateString(firstName)) {
                 return response.status(400).json({ message: "Não há nenhum nome para buscar no momento!" });
             }
-
-            var invites = await GetByName(firstName, lastName);
-            var list: IResponseFamily[] = [];
-
-            for (let i = 0; i < invites.length; i++) {
-                let invite = invites[i];
-                let familyId = invite.FamilyId;
-                let members = await GetAllByFamilyId(familyId);
-
-                var family: IResponseFamily = {
-                    FamilyId: familyId,
-                    Members: members
-                };
-
-                list.push(family);
+    
+            let invites = await GetByName(firstName, lastName);
+            if (!invites.length) {
+                return response.json({ families: [] });
             }
-
-            return response.json({ families: list });
+    
+            const uniqueFamilyIds = Array.from(new Set(invites.map(invite => invite.FamilyId)));
+    
+            const familyData = await Promise.all(
+                uniqueFamilyIds.map(async (familyId) => {
+                    const members = await GetAllByFamilyId(familyId);
+                    return {
+                        FamilyId: familyId,
+                        NameSearched: `${firstName} ${lastName ?? ""}`.trim(),
+                        Members: members
+                    };
+                })
+            );
+    
+            return response.json({ families: familyData });
+    
         } catch (error) {
             return response.status(500).json({ message: "Não foi possível buscar o convidado, tente novamente mais tarde!" });
         }
@@ -116,7 +120,7 @@ class InvitesController {
                     return result;
                 }, {});
 
-            var list:Invites[] = [];
+            var list: Invites[] = [];
 
             for (const group in result) {
                 // Acessa os elementos do grupo
@@ -125,13 +129,13 @@ class InvitesController {
                 family.forEach((member) => {
                     var name = member.Nome.split(" ");
 
-                    var invite:Invites = new Invites(name[0], name.length > 1 ? name[1] : "", false, member.Grupo);
+                    var invite: Invites = new Invites(name[0], name.length > 1 ? name[1] : "", false, member.Grupo);
 
                     list.push(invite);
                 });
             }
 
-            await 
+            await CreateInviteMassive(list);
 
             fs.unlinkSync(file.path);
 

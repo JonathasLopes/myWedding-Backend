@@ -18,5 +18,6 @@ const upload = multer({ storage });
 router.get("/", (req, res) => { res.send("Estou on!") });
 
 router.post('/uploadInvites', upload.single('file'), InvitesController.UploadExcel);
+router.post('/SearchInvite', InvitesController.SearchInvite);
 
 export default router;

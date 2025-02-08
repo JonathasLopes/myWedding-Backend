@@ -31,12 +31,16 @@ async function CreateInviteMassive(invites: Invites[]) {
     }
 }
 
-async function GetByName(firstName?: string, lastName?: string) {
+async function GetByName(firstName: string, lastName?: string) {
     try {
         const db:Db = await connectDB();
         const collection = db.collection<IInvites>(collectionName);
 
-        const query = {
+        const query = lastName == undefined ? {
+            $or: [
+                { FirstName: { $regex: firstName, $options: "i" } },
+            ]
+        } : {
             $or: [
                 { FirstName: { $regex: firstName, $options: "i" } }, // "i" para case-insensitive
                 { LastName: { $regex: lastName, $options: "i" } }
@@ -53,7 +57,7 @@ async function GetByName(firstName?: string, lastName?: string) {
     }
 }
 
-async function GetAllByFamilyId(familyId: string) {
+async function GetAllByFamilyId(familyId: number) {
     try {
         const db:Db = await connectDB();
         const collection = db.collection<IInvites>(collectionName);

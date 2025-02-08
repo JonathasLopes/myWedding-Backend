@@ -4,9 +4,9 @@ export default class Invites extends BaseModel {
     private FirstName: string;
     private LastName: string;
     private Confirmed: boolean;
-    private FamilyId: string;
+    private FamilyId: number;
 
-    constructor(firstName: string, lastName: string, confirmed: boolean, familyId: string) {
+    constructor(firstName: string, lastName: string, confirmed: boolean, familyId: number) {
         super()
         this.FirstName = firstName;
         this.LastName = lastName;
@@ -44,7 +44,7 @@ export default class Invites extends BaseModel {
         this.Confirmed = confirmed;
     }
 
-    public setFamilyId(familyId: string) {
+    public setFamilyId(familyId: number) {
         this.FamilyId = familyId;
     }
 }

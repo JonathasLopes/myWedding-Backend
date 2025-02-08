@@ -3,5 +3,5 @@ export default interface IInvites {
     LastName: string,
     Id: string,
     Confirmed: boolean,
-    FamilyId: string
+    FamilyId: number
 }
