@@ -17,7 +17,13 @@ const upload = multer({ storage });
 
 router.get("/", (req, res) => { res.send("Estou on!") });
 
+router.get("/GetAllInvites", InvitesController.GetAllInvites);
+
 router.post('/uploadInvites', upload.single('file'), InvitesController.UploadExcel);
 router.post('/SearchInvite', InvitesController.SearchInvite);
+
+
+
+router.delete('/DeleteAllInvites', InvitesController.DeleteAllInvites);
 
 export default router;

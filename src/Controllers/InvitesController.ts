@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import VerifyBasicAuthHelper from '../Helpers/VerifyBasicAuthHelper';
 import { ValidateString } from '../Helpers/ValidateTypes';
-import { CreateInviteMassive, GetAllByFamilyId, GetByName, UpdateConfirmed } from '../Repositories/InvitesRepository';
+import { CreateInviteMassive, DeleteAll, GetAll, GetAllByFamilyId, GetByName, UpdateConfirmed } from '../Repositories/InvitesRepository';
 import ReadExcel from '../Helpers/ReadExcel';
 import fs from 'fs';
-import IResponseFamily from '../Interfaces/ResponseFamilyInterface';
 import Invites from '../Models/InvitesModel';
+import { closeConnection } from '../Connections/MongoDb';
+import normalizeText from '../Helpers/NormalizeText';
 
 class InvitesController {
     async ConfirmPresence(request: Request, response: Response): Promise<any> {
@@ -37,8 +38,46 @@ class InvitesController {
         }
     }
 
+    async GetAllInvites(request: Request, response: Response): Promise<any> {
+        try {
+            var headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
+
+            if (headerResponse === 400) {
+                return response.status(400).json({ message: "Usuário não autenticado!" })
+            } else if (headerResponse === 401) {
+                return response.status(401).json({ message: "Usuário não autorizado!" });
+            }
+
+            var result = await GetAll();
+
+            return response.json(result);
+        }
+        catch(error) {
+            return response.status(500).json({ message: "Não foi possível deletar todos os convites, tente novamente mais tarde!" });
+        }
+    }
+
+    async DeleteAllInvites(request: Request, response: Response): Promise<any> {
+        try {
+            var headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
+
+            if (headerResponse === 400) {
+                return response.status(400).json({ message: "Usuário não autenticado!" })
+            } else if (headerResponse === 401) {
+                return response.status(401).json({ message: "Usuário não autorizado!" });
+            }
+
+            await DeleteAll();
+
+            return response.json({ message: 'Convites deletados com sucesso!' });
+        }
+        catch(error) {
+            return response.status(500).json({ message: "Não foi possível deletar todos os convites, tente novamente mais tarde!" });
+        }
+    }
+
     async SearchInvite(request: Request, response: Response): Promise<any> {
-        const { firstName, lastName } = request.body;
+        const { name } = request.body;
     
         try {
             const headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
@@ -50,11 +89,12 @@ class InvitesController {
                     return response.status(401).json({ message: "Usuário não autorizado!" });
             }
     
-            if (!ValidateString(firstName)) {
+            if (!ValidateString(name)) {
                 return response.status(400).json({ message: "Não há nenhum nome para buscar no momento!" });
             }
     
-            let invites = await GetByName(firstName, lastName);
+            let invites = await GetByName(name);
+
             if (!invites.length) {
                 return response.json({ families: [] });
             }
@@ -64,9 +104,11 @@ class InvitesController {
             const familyData = await Promise.all(
                 uniqueFamilyIds.map(async (familyId) => {
                     const members = await GetAllByFamilyId(familyId);
+                    const nameSearch = invites.find(x => x.FamilyId == familyId).Name;
+
                     return {
                         FamilyId: familyId,
-                        NameSearched: `${firstName} ${lastName ?? ""}`.trim(),
+                        NameSearched: nameSearch,
                         Members: members
                     };
                 })
@@ -76,6 +118,8 @@ class InvitesController {
     
         } catch (error) {
             return response.status(500).json({ message: "Não foi possível buscar o convidado, tente novamente mais tarde!" });
+        } finally {
+            closeConnection();
         }
     }
 
@@ -110,6 +154,14 @@ class InvitesController {
 
     async UploadExcel(request: Request, response: Response): Promise<any> {
         try {
+            var headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
+
+            if (headerResponse === 400) {
+                return response.status(400).json({ message: "Usuário não autenticado!" })
+            } else if (headerResponse === 401) {
+                return response.status(401).json({ message: "Usuário não autorizado!" });
+            }
+
             const file = request.file;
 
             var excelJson = ReadExcel(file.path);
@@ -127,9 +179,7 @@ class InvitesController {
                 const family = result[group];
 
                 family.forEach((member) => {
-                    var name = member.Nome.split(" ");
-
-                    var invite: Invites = new Invites(name[0], name.length > 1 ? name[1] : "", false, member.Grupo);
+                    var invite: Invites = new Invites(member.Nome, false, member.Grupo, normalizeText(member.Nome).toLowerCase());
 
                     list.push(invite);
                 });

@@ -1,6 +1,5 @@
 export default interface IInvites {
-    FirstName: string,
-    LastName: string,
+    Name: string,
     Id: string,
     Confirmed: boolean,
     FamilyId: number

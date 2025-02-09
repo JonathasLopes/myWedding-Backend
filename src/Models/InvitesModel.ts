@@ -1,26 +1,26 @@
 import BaseModel from "./BaseModel";
 
 export default class Invites extends BaseModel {
-    private FirstName: string;
-    private LastName: string;
+    private Name: string;
     private Confirmed: boolean;
     private FamilyId: number;
+    private NameSearch: string;
 
-    constructor(firstName: string, lastName: string, confirmed: boolean, familyId: number) {
+    constructor(name: string, confirmed: boolean, familyId: number, nameSearch) {
         super()
-        this.FirstName = firstName;
-        this.LastName = lastName;
+        this.Name = name;
         this.Confirmed = confirmed;
         this.FamilyId = familyId;
+        this.NameSearch = nameSearch;
     }
 
     //getters
-    public getFirstName() {
-        return this.FirstName;
+    public getName() {
+        return this.Name;
     }
 
-    public getLastName() {
-        return this.LastName;
+    public getNameSearch() {
+        return this.NameSearch;
     }
 
     public getConfirmed() {
@@ -32,12 +32,12 @@ export default class Invites extends BaseModel {
     }
 
     //setters
-    public setFirstName(firstName: string) {
-        this.FirstName = firstName;
+    public setName(name: string) {
+        this.Name = name;
     }
 
-    public setLastName(lastName: string) {
-        this.LastName = lastName;
+    public setNameSearch(nameSearch: string) {
+        this.NameSearch = nameSearch;
     }
 
     public setConfirmed(confirmed: boolean) {

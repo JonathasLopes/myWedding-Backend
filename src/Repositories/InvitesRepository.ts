@@ -2,12 +2,13 @@ import { Db } from "mongodb";
 import { connectDB, closeConnection } from "../Connections/MongoDb";
 import Invites from "../Models/InvitesModel";
 import IInvites from "../Interfaces/InvitesInterface";
+import normalizeText from "../Helpers/NormalizeText";
 
 const collectionName = "Invites";
 
 async function CreateInvite(invite: Invites) {
     try {
-        const db:Db = await connectDB();
+        const db: Db = await connectDB();
         const collection = db.collection<Invites>(collectionName);
 
         await collection.insertOne(invite);
@@ -20,7 +21,7 @@ async function CreateInvite(invite: Invites) {
 
 async function CreateInviteMassive(invites: Invites[]) {
     try {
-        const db:Db = await connectDB();
+        const db: Db = await connectDB();
         const collection = db.collection<Invites>(collectionName);
 
         await collection.insertMany(invites);
@@ -31,38 +32,38 @@ async function CreateInviteMassive(invites: Invites[]) {
     }
 }
 
-async function GetByName(firstName: string, lastName?: string) {
+async function GetByName(name: string) {
     try {
-        const db:Db = await connectDB();
+        const db: Db = await connectDB();
         const collection = db.collection<IInvites>(collectionName);
 
-        const query = lastName == undefined ? {
-            $or: [
-                { FirstName: { $regex: firstName, $options: "i" } },
-            ]
-        } : {
-            $or: [
-                { FirstName: { $regex: firstName, $options: "i" } }, // "i" para case-insensitive
-                { LastName: { $regex: lastName, $options: "i" } }
-            ]
-        };
+        const users = await collection.find({ NameSearch: { $regex: new RegExp(".*" + normalizeText(name) + ".*", "i") } }).toArray();
 
-        var result = await collection.find(query).toArray();
-
-        return result;
+        return users;
     } catch (err) {
         throw err;
-    } finally {
-        closeConnection();
     }
 }
 
 async function GetAllByFamilyId(familyId: number) {
     try {
-        const db:Db = await connectDB();
+        const db: Db = await connectDB();
         const collection = db.collection<IInvites>(collectionName);
 
         var result = await collection.find({ FamilyId: familyId }).toArray();
+
+        return result;
+    } catch (err) {
+        throw err;
+    }
+}
+
+async function GetAll() {
+    try {
+        const db: Db = await connectDB();
+        const collection = db.collection<IInvites>(collectionName);
+
+        var result = await collection.find({}).toArray();
 
         return result;
     } catch (err) {
@@ -91,10 +92,27 @@ async function UpdateConfirmed(id: string, confirmed: boolean) {
     }
 }
 
+async function DeleteAll() {
+    try {
+        const db = await connectDB();
+        const collection = db.collection(collectionName);
+
+        var result = await collection.deleteMany({});
+
+        return result;
+    } catch (err) {
+        throw err;
+    } finally {
+        closeConnection();
+    }
+}
+
 export {
     CreateInvite,
     CreateInviteMassive,
     GetByName,
+    GetAll,
     UpdateConfirmed,
     GetAllByFamilyId,
+    DeleteAll,
 }
