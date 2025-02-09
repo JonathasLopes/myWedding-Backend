@@ -7,23 +7,23 @@ import path from 'path';
 
 const router = Router();
 
-const uploadDir = path.join(__dirname, 'Uploads');
+// const uploadDir = path.join(__dirname, 'Uploads');
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
+// if (!fs.existsSync(uploadDir)) {
+//   fs.mkdirSync(uploadDir);
+// }
 
-const upload = multer({ storage });
+// const upload = multer({ storage });
 
 router.get("/", (req, res) => { res.send("Estou on!") });
 
 router.get("/GetAllInvites", InvitesController.GetAllInvites);
 
-router.post('/uploadInvites', upload.single('file'), InvitesController.UploadExcel);
+//router.post('/uploadInvites', upload.single('file'), InvitesController.UploadExcel);
 router.post('/SearchInvite', InvitesController.SearchInvite);
 
 
 
-router.delete('/DeleteAllInvites', InvitesController.DeleteAllInvites);
+//router.delete('/DeleteAllInvites', InvitesController.DeleteAllInvites);
 
 export default router;
