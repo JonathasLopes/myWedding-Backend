@@ -21,6 +21,9 @@ router.get("/", (req, res) => { res.send("Estou on!") });
 router.get("/GetAllInvites", InvitesController.GetAllInvites);
 router.get("/GetAllMessages", MessageController.GetAll);
 
+router.put("/ConfirmPresence", InvitesController.ConfirmPresence);
+router.put("/RemovePresence", InvitesController.RemovePresence);
+
 //router.post('/uploadInvites', upload.single('file'), InvitesController.UploadExcel);
 router.post('/SearchInvite', InvitesController.SearchInvite);
 router.post('/SendMessage', MessageController.SendMessage);
