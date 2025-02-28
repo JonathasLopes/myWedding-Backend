@@ -87,8 +87,6 @@ async function UpdateConfirmed(id: string, confirmed: boolean) {
         return result;
     } catch (err) {
         throw err;
-    } finally {
-        closeConnection();
     }
 }
 

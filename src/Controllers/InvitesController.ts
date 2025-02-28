@@ -26,10 +26,10 @@ class InvitesController {
             }
 
             const arrayIds = ids.split(",");
-
-            for (var i = 0; i < arrayIds.length; i++) {
-                await UpdateConfirmed(arrayIds[i], true);
-            }
+            
+            await Promise.all(arrayIds.map(async (item) => {
+                await UpdateConfirmed(item, true);
+            }));
 
             return response.json({ message: `${arrayIds.length > 1 ? "Convidados confirmados" : "Convidado confirmado"} com sucesso!` });
         }
@@ -52,7 +52,7 @@ class InvitesController {
 
             return response.json(result);
         }
-        catch(error) {
+        catch (error) {
             return response.status(500).json({ message: "Não foi possível deletar todos os convites, tente novamente mais tarde!" });
         }
     }
@@ -71,36 +71,36 @@ class InvitesController {
 
             return response.json({ message: 'Convites deletados com sucesso!' });
         }
-        catch(error) {
+        catch (error) {
             return response.status(500).json({ message: "Não foi possível deletar todos os convites, tente novamente mais tarde!" });
         }
     }
 
     async SearchInvite(request: Request, response: Response): Promise<any> {
         const { name } = request.body;
-    
+
         try {
             const headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
-    
+
             switch (headerResponse) {
                 case 400:
                     return response.status(400).json({ message: "Usuário não autenticado!" });
                 case 401:
                     return response.status(401).json({ message: "Usuário não autorizado!" });
             }
-    
+
             if (!ValidateString(name)) {
                 return response.status(400).json({ message: "Não há nenhum nome para buscar no momento!" });
             }
-    
+
             let invites = await GetByName(name);
 
             if (!invites.length) {
                 return response.json({ families: [] });
             }
-    
+
             const uniqueFamilyIds = Array.from(new Set(invites.map(invite => invite.FamilyId)));
-    
+
             const familyData = await Promise.all(
                 uniqueFamilyIds.map(async (familyId) => {
                     const members = await GetAllByFamilyId(familyId);
@@ -113,9 +113,9 @@ class InvitesController {
                     };
                 })
             );
-    
+
             return response.json({ families: familyData });
-    
+
         } catch (error) {
             return response.status(500).json({ message: "Não foi possível buscar o convidado, tente novamente mais tarde!" });
         } finally {
@@ -141,9 +141,9 @@ class InvitesController {
 
             const arrayIds = ids.split(",");
 
-            for (var i = 0; i < arrayIds.length(); i++) {
-                await UpdateConfirmed(arrayIds[i], false);
-            }
+            await Promise.all(arrayIds.map(async (item) => {
+                await UpdateConfirmed(item, false);
+            }));
 
             return response.json({ message: `${arrayIds.length() > 1 ? "Confirmações removidas" : "Confirmação removida"} com sucesso!` });
         }
