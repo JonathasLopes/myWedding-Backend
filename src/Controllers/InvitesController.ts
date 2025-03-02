@@ -145,7 +145,7 @@ class InvitesController {
                 await UpdateConfirmed(item, false);
             }));
 
-            return response.json({ message: `${arrayIds.length() > 1 ? "Confirmações removidas" : "Confirmação removida"} com sucesso!` });
+            return response.json({ message: `${arrayIds.length > 1 ? "Confirmações removidas" : "Confirmação removida"} com sucesso!` });
         }
         catch (error) {
             return response.status(500).json({ message: "Não foi possível remover a confirmação de presença, tente novamente mais tarde!" });

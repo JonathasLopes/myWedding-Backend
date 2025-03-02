@@ -83,7 +83,7 @@ async function UpdateConfirmed(id: string, confirmed: boolean) {
         const options = { returnDocument: "after", upsert: false };
 
         var result = await collection.findOneAndUpdate(filter, update, options);
-
+        
         return result;
     } catch (err) {
         throw err;
