@@ -6,5 +6,5 @@ import SendNotConfirmed from "./Services/SendEmailService";
 cron.schedule("0 10 * * 5", async () => {
     var allNotConfirmed = await GetAllNotConfirmed();
 
-    await SendNotConfirmed(allNotConfirmed.map(x => x.Name).join(","));
+    await SendNotConfirmed(allNotConfirmed.map(x => x.Name).join(","), allNotConfirmed.length);
 });
