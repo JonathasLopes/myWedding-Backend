@@ -73,6 +73,21 @@ async function GetAll() {
     }
 }
 
+async function GetAllNotConfirmed() {
+    try {
+        const db: Db = await connectDB();
+        const collection = db.collection<IInvites>(collectionName);
+
+        var result = await collection.find({Confirmed: false}).toArray();
+
+        return result;
+    } catch (err) {
+        throw err;
+    } finally {
+        closeConnection();
+    }
+}
+
 async function UpdateConfirmed(id: string, confirmed: boolean) {
     try {
         const db = await connectDB();
@@ -110,6 +125,7 @@ export {
     CreateInviteMassive,
     GetByName,
     GetAll,
+    GetAllNotConfirmed,
     UpdateConfirmed,
     GetAllByFamilyId,
     DeleteAll,

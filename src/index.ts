@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import router from './routes';
 import dotenv from 'dotenv';
+import "./scheduler";
 
 const app = express();
 dotenv.config();
