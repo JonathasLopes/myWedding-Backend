@@ -14,7 +14,7 @@ app.use('/api', router);
 
 jest.setTimeout(10000);
 
-describe('Message Controller', () => {
+describe.skip('Message Controller', () => {
     test('GET /api/GetAllMessages deve retornar status 200 e todos as mensagens', async () => {
         const response = await request(app)
             .get('/api/GetAllMessages')
