@@ -1,0 +1,13 @@
+name: Run Scheduled Task
+
+on:
+  schedule:
+    - cron: "0 14 * * Sun" # Executa todo início de hora (0 minutos)
+  workflow_dispatch: # Permite rodar manualmente
+
+jobs:
+  cron-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar a API do Vercel
+        run: curl -X GET https://my-wedding-self.vercel.app/api/sendAllNotConfirmedEmail

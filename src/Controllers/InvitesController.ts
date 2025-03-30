@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import VerifyBasicAuthHelper from '../Helpers/VerifyBasicAuthHelper';
 import { ValidateString } from '../Helpers/ValidateTypes';
-import { CreateInviteMassive, DeleteAll, GetAll, GetAllByFamilyId, GetByName, UpdateConfirmed } from '../Repositories/InvitesRepository';
+import { CreateInviteMassive, DeleteAll, GetAll, GetAllByFamilyId, GetAllNotConfirmed, GetByName, UpdateConfirmed } from '../Repositories/InvitesRepository';
 import ReadExcel from '../Helpers/ReadExcel';
 import fs from 'fs';
 import Invites from '../Models/InvitesModel';
 import { closeConnection } from '../Connections/MongoDb';
 import normalizeText from '../Helpers/NormalizeText';
+import SendNotConfirmed from '../Services/SendEmailService';
 
 class InvitesController {
     async ConfirmPresence(request: Request, response: Response): Promise<any> {
@@ -193,6 +194,27 @@ class InvitesController {
         }
         catch (error) {
             return response.status(500).json({ message: "Não foi possível realizar o upload, tente novamente mais tarde!" });
+        }
+    }
+
+    async SendAllNotConfirmedEmail(request: Request, response: Response): Promise<any> {
+        try {
+            var headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
+
+            if (headerResponse === 400) {
+                return response.status(400).json({ message: "Usuário não autenticado!" })
+            } else if (headerResponse === 401) {
+                return response.status(401).json({ message: "Usuário não autorizado!" });
+            }
+
+            var allNotConfirmed = await GetAllNotConfirmed();
+
+            await SendNotConfirmed(allNotConfirmed.map(x => x.Name).join(","), allNotConfirmed.length);
+
+            return response.json({ message: "Email enviado com sucesso!" });
+        }
+        catch(error) {
+            return response.status(500).json({ message: "Não foi possível realizar o envio de email, tente novamente mais tarde!" });
         }
     }
 }
