@@ -2,7 +2,7 @@ name: Run Scheduled Task
 
 on:
   schedule:
-    - cron: "36 13 * * *" # Executa todos os dias a meia noite
+    - cron: "*/5 * * * *" # Executa todos os dias a meia noite
   workflow_dispatch: # Permite rodar manualmente
 
 jobs:
