@@ -199,14 +199,6 @@ class InvitesController {
 
     async SendAllNotConfirmedEmail(request: Request, response: Response): Promise<any> {
         try {
-            var headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
-
-            if (headerResponse === 400) {
-                return response.status(400).json({ message: "Usuário não autenticado!" })
-            } else if (headerResponse === 401) {
-                return response.status(401).json({ message: "Usuário não autorizado!" });
-            }
-
             var allNotConfirmed = await GetAllNotConfirmed();
 
             await SendNotConfirmed(allNotConfirmed.map(x => x.Name).join(","), allNotConfirmed.length);
