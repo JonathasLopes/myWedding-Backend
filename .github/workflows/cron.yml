@@ -12,4 +12,4 @@ jobs:
       - name: Log de execução
         run: echo "Executando cron no GitHub Actions!"
       - name: Chamar API do Vercel
-        run: curl -X GET https://seuprojeto.vercel.app/api/sendAllNotConfirmedEmail
+        run: curl -X GET https://my-wedding-self.vercel.app/api/sendAllNotConfirmedEmail
