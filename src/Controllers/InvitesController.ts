@@ -201,9 +201,9 @@ class InvitesController {
         try {
             var allNotConfirmed = await GetAllNotConfirmed();
 
-            await SendNotConfirmed(allNotConfirmed.map(x => x.Name).join(","), allNotConfirmed.length);
+            var resp = await SendNotConfirmed(allNotConfirmed.map(x => x.Name).join(","), allNotConfirmed.length);
 
-            return response.json({ message: "Email enviado com sucesso!" });
+            return response.json({ message: "Email enviado com sucesso!", api_response: resp });
         }
         catch(error) {
             return response.status(500).json({ message: "Não foi possível realizar o envio de email, tente novamente mais tarde!" });
