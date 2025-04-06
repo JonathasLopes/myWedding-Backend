@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import VerifyBasicAuthHelper from '../Helpers/VerifyBasicAuthHelper';
 import { ValidateString } from '../Helpers/ValidateTypes';
-import { CreateInviteMassive, DeleteAll, GetAll, GetAllByFamilyId, GetAllNotConfirmed, GetByName, UpdateConfirmed } from '../Repositories/InvitesRepository';
+import { CreateInviteMassive, DeleteAll, GetAll, GetAllByFamilyId, GetAllConfirmed, GetAllNotConfirmed, GetByName, UpdateConfirmed } from '../Repositories/InvitesRepository';
 import ReadExcel from '../Helpers/ReadExcel';
 import fs from 'fs';
 import Invites from '../Models/InvitesModel';
@@ -50,6 +50,25 @@ class InvitesController {
             }
 
             var result = await GetAll();
+
+            return response.json(result);
+        }
+        catch (error) {
+            return response.status(500).json({ message: "Não foi possível deletar todos os convites, tente novamente mais tarde!" });
+        }
+    }
+
+    async GetAllConfirmed(request: Request, response: Response): Promise<any> {
+        try {
+            var headerResponse = VerifyBasicAuthHelper(request.headers['authorization']);
+
+            if (headerResponse === 400) {
+                return response.status(400).json({ message: "Usuário não autenticado!" })
+            } else if (headerResponse === 401) {
+                return response.status(401).json({ message: "Usuário não autorizado!" });
+            }
+
+            var result = await GetAllConfirmed();
 
             return response.json(result);
         }

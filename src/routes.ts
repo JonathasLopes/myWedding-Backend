@@ -19,6 +19,7 @@ const router = Router();
 router.get("/", (req, res) => { res.send("Estou on!") });
 
 router.get("/GetAllInvites", InvitesController.GetAllInvites);
+router.get("/GetAllConfirmed", InvitesController.GetAllConfirmed);
 router.get("/GetAllMessages", MessageController.GetAll);
 
 router.put("/ConfirmPresence", InvitesController.ConfirmPresence);
