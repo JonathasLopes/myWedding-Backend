@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import VerifyBasicAuthHelper from '../Helpers/VerifyBasicAuthHelper';
 import { ValidateString } from '../Helpers/ValidateTypes';
 import { CreateInviteMassive, DeleteAll, GetAll, GetAllByFamilyId, GetAllConfirmed, GetAllNotConfirmed, GetByName, UpdateConfirmed } from '../Repositories/InvitesRepository';
-import ReadExcel from '../Helpers/ReadExcel';
+import { ReadExcel, WriteExcel } from '../Helpers/ReadExcel';
 import fs from 'fs';
 import Invites from '../Models/InvitesModel';
 import { closeConnection } from '../Connections/MongoDb';
@@ -27,7 +27,7 @@ class InvitesController {
             }
 
             const arrayIds = ids.split(",");
-            
+
             await Promise.all(arrayIds.map(async (item) => {
                 await UpdateConfirmed(item, true);
             }));
@@ -143,6 +143,21 @@ class InvitesController {
         }
     }
 
+    async DownloadConfirmed(request: Request, response: Response): Promise<any> {
+        try {
+            var result = await GetAllConfirmed();
+
+            var file = WriteExcel(result);
+
+            response.setHeader('Content-Disposition', 'attachment; filename="convidados.xlsx"');
+            response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            return response.send(file);
+        }
+        catch (error) {
+            return response.status(500).json({ message: "Não foi possível fazer o download de todos os convidados confirmados, tente novamente mais tarde!" });
+        }
+    }
+
     async RemovePresence(request: Request, response: Response): Promise<any> {
         const { ids } = request.body;
 
@@ -224,7 +239,7 @@ class InvitesController {
 
             return response.json({ message: "Email enviado com sucesso!", api_response: resp });
         }
-        catch(error) {
+        catch (error) {
             return response.status(500).json({ message: "Não foi possível realizar o envio de email, tente novamente mais tarde!" });
         }
     }

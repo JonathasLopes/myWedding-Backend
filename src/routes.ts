@@ -34,4 +34,6 @@ router.delete('/DeleteMessage', MessageController.DeleteMessage);
 
 router.get("/sendAllNotConfirmedEmail", InvitesController.SendAllNotConfirmedEmail);
 
+router.get("/DownloadAllConfirmed", InvitesController.DownloadConfirmed);
+
 export default router;
